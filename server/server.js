@@ -12,6 +12,7 @@ const app = express();
 
 // require routes
 const todos = require('../routes/todos');
+const users = require('../routes/users');
 
 // global variables
 const port = process.env.PORT;
@@ -21,6 +22,7 @@ app.use(express.json());
 
 // routes
 app.use('/api/v1/todos', todos);
+app.use('/api/v1/users', users);
 
 // start server
 app.listen(port, () => {
