@@ -14,6 +14,7 @@ const todoSchema = new Schema({
 		type: Boolean,
 		default: false,
 	},
+	creator: Schema.Types.ObjectId,
 });
 
 const Todo = mongoose.model('Todo', todoSchema);
