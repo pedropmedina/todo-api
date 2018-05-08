@@ -26,6 +26,8 @@ const validateTodo = todo => {
 			.required(),
 		completed: Joi.boolean(),
 	};
+
+	return Joi.validate(todo, schema);
 };
 
 module.exports = { Todo, validateTodo };

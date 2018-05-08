@@ -10,16 +10,17 @@ const { mongoose } = require('../db/mongoose');
 // run express
 const app = express();
 
+// require routes
+const todos = require('../routes/todos');
+
 // global variables
 const port = process.env.PORT;
 
 // middleware
 app.use(express.json());
 
-app.use((req, res, next) => {
-	res.send('hello there from express');
-	next();
-});
+// routes
+app.use('/api/v1/todos', todos);
 
 // start server
 app.listen(port, () => {
