@@ -2,6 +2,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 import { Link, withRouter } from 'react-router-dom';
 
+// ---------- start styles ----------
 const FormWrapper = styled.div`
 	position: absolute;
 	top: 50%;
@@ -134,6 +135,7 @@ const RedirectLink = styled(Link)`
 	text-decoration: none;
 	color: #3bafaf;
 `;
+// ---------- end styles ----------
 
 class SignUp extends React.Component {
 	state = {
