@@ -22,9 +22,9 @@ const port = process.env.PORT;
 app.use(express.json());
 
 // routes
-app.use('/api/v1/todos', todos);
-app.use('/api/v1/users', users);
-app.use('/api/v1/auth', auth);
+app.use('/api/todos', todos);
+app.use('/api/users', users);
+app.use('/api/auth', auth);
 
 // start server
 app.listen(port, () => {

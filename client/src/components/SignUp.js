@@ -1,75 +1,118 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
-const Form = styled.form`
-	width: 50rem;
+const Wrapper = styled.div`
 	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	padding: 4rem 6rem;
-	background-color: #dedede;
 
-	> * {
-		width: 100%;
-	}
+	form {
+		width: 50rem;
+		padding: 4rem 6rem;
+		background-color: #dedede;
+		border-radius: 0.2rem;
+		box-shadow: 0 0.5rem 0.7rem rgba(0, 0, 0, 0.18);
 
-	> input {
-		height: 5rem;
-		text-indent: 1rem;
-		font-size: 1.6rem;
-		border: none;
-		border-bottom: 0.2rem solid #fefefe;
-		background-color: inherit;
-		color: #fefefe;
-		outline: none;
-		position: relative;
+		> * {
+			width: 100%;
+		}
 
-		&::placeholder {
+		> input {
+			height: 5rem;
+			text-indent: 1rem;
+			font-size: 1.6rem;
+			border: none;
+			border-bottom: 0.2rem solid #fefefe;
+			background-color: inherit;
+			color: #3bafaf;
+			outline: none;
+			position: relative;
+
+			&::placeholder {
+				color: #fefefe;
+			}
+
+			&:focus {
+				background-color: #cecece;
+			}
+
+			&:focus + div::after {
+				transform: scaleX(1);
+				background-color: #318c8c;
+			}
+		}
+
+		> div {
+			width: 100%;
+			background-color: inherit;
+			height: 0.5rem;
+			display: block;
+			margin-bottom: 2rem;
+			position: relative;
+
+			&::after {
+				content: '';
+				position: absolute;
+				width: 100%;
+				height: 0.3rem;
+				margin-top: -0.2rem;
+				background-color: transparent;
+				transform: scaleX(0);
+				transform-origin: center;
+				transition: all 0.3s;
+			}
+		}
+
+		> button {
+			padding: 1.5rem;
+			border: none;
+			background-color: #3bafaf;
 			color: #fefefe;
-		}
+			font-size: 1.6rem;
+			text-transform: uppercase;
+			letter-spacing: 0.1rem;
+			margin-top: 1rem;
+			outline: none;
+			border-radius: 0.2rem;
+			box-shadow: 0 0.5rem 0.7rem rgba(0, 0, 0, 0.1);
+			transition: all 0.1s;
 
-		&:focus {
-			background-color: #cecece;
-		}
+			&:hover {
+				transform: translateY(-0.1rem);
+			}
 
-		&:focus + div::after {
-			transform: scaleX(1);
-			background-color: #318c8c;
+			&:active {
+				box-shadow: 0 0.3rem 0.5rem rgba(0, 0, 0, 0.1);
+				transform: translateY(0);
+			}
 		}
 	}
 
 	> div {
-		width: 100%;
-		background-color: inherit;
-		height: 0.5rem;
-		display: block;
-		margin-bottom: 2rem;
-		position: relative;
-
-		&::after {
-			content: '';
-			position: absolute;
-			width: 100%;
-			height: 0.3rem;
-			margin-top: -0.2rem;
-			background-color: transparent;
-			transform: scaleX(0);
-			transform-origin: center;
-			transition: all 0.3s;
-		}
+		margin-top: 0.5rem;
+		padding: 1rem;
+		font-size: 1.3rem;
+		color: #aeaeae;
+		letter-spacing: 0.03rem;
 	}
+`;
 
-	> button {
-		padding: 1.5rem;
-		border: none;
-		background-color: #aeaeae;
-		color: #fefefe;
-		font-size: 1.6rem;
-		text-transform: uppercase;
-		letter-spacing: 0.1rem;
-		margin-top: 1rem;
-	}
+const InvalidField = styled.span`
+	display: block;
+	padding: 0.7rem;
+	margin: -1rem 0 1rem 0;
+	background-color: #edcece;
+	color: #e8e8e8;
+	font-size: 1.2rem;
+	letter-spacing: 0.08rem;
+	border-radius: 0.2rem;
+`;
+
+const RedirectLink = styled(Link)`
+	text-decoration: none;
+	color: #3bafaf;
 `;
 
 class SignUp extends React.Component {
@@ -82,22 +125,89 @@ class SignUp extends React.Component {
 		errFields: {},
 	};
 
-	onSubmitForm = () => {
-		// code here
+	onSubmitForm = async e => {
+		e.preventDefault();
+		const errFields = this.validateFields();
+		this.setState(() => ({ errFields }));
+		if (Object.keys(errFields).length) return;
+
+		try {
+			const res = await fetch('/api/users', {
+				method: 'POST',
+				body: JSON.stringify(this.state.fields),
+				headers: {
+					'content-type': 'application/json',
+				},
+			});
+			const parsedRes = await res.json();
+			console.log(parsedRes);
+		} catch (ex) {
+			console.log(ex);
+		}
+	};
+
+	onChangeInput = e => {
+		const name = e.target.name;
+		const val = e.target.value;
+		const fields = { ...this.state.fields };
+		fields[name] = val;
+		this.setState(() => ({ fields }));
+	};
+
+	validateFields = () => {
+		const { name, email, password } = this.state.fields;
+		const errFields = {};
+		if (!name) errFields['name'] = 'Name field is required.';
+		if (!email) errFields['email'] = 'Email is required.';
+		if (!password) errFields['password'] = 'Password is required.';
+		return errFields;
 	};
 
 	render() {
 		const { name, email, password } = this.state.fields;
 		return (
-			<Form action="#" onSubmit={this.onSubmitForm}>
-				<input type="text" placeholder="name" value={name} />
-				<div />
-				<input type="text" placeholder="email" value={email} />
-				<div />
-				<input type="text" placeholder="password" value={password} />
-				<div />
-				<button>Sign up</button>
-			</Form>
+			<Wrapper>
+				<form onSubmit={this.onSubmitForm}>
+					<input
+						type="text"
+						placeholder="name"
+						name="name"
+						value={name}
+						onChange={this.onChangeInput}
+					/>
+					<div />
+					{this.state.errFields.name && (
+						<InvalidField>{this.state.errFields.name}</InvalidField>
+					)}
+					<input
+						type="text"
+						placeholder="email"
+						name="email"
+						value={email}
+						onChange={this.onChangeInput}
+					/>
+					<div />
+					{this.state.errFields.email && (
+						<InvalidField>{this.state.errFields.email}</InvalidField>
+					)}
+					<input
+						type="password"
+						placeholder="password"
+						name="password"
+						value={password}
+						onChange={this.onChangeInput}
+					/>
+					<div />
+					{this.state.errFields.password && (
+						<InvalidField>{this.state.errFields.password}</InvalidField>
+					)}
+
+					<button>Sign up</button>
+				</form>
+				<div>
+					Have an account? - <RedirectLink to="/">Login!</RedirectLink>
+				</div>
+			</Wrapper>
 		);
 	}
 }
