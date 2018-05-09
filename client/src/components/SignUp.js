@@ -1,8 +1,8 @@
 import React from 'react';
-import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import styled, { css } from 'styled-components';
+import { Link, withRouter } from 'react-router-dom';
 
-const Wrapper = styled.div`
+const FormWrapper = styled.div`
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -110,6 +110,26 @@ const InvalidField = styled.span`
 	border-radius: 0.2rem;
 `;
 
+const Error = InvalidField.extend`
+	position: absolute;
+	top: -1rem;
+	left: 50%;
+	font-size: 1.6rem;
+	padding: 2rem;
+	background-color: transparent;
+	color: transparent;
+	transform: translateX(-50%);
+	transition: all 0.2s;
+
+	${props =>
+		props.error &&
+		css`
+			background-color: #e26f6f;
+			color: #fefefe;
+			top: 20%;
+		`};
+`;
+
 const RedirectLink = styled(Link)`
 	text-decoration: none;
 	color: #3bafaf;
@@ -123,6 +143,7 @@ class SignUp extends React.Component {
 			password: '',
 		},
 		errFields: {},
+		error: '',
 	};
 
 	onSubmitForm = async e => {
@@ -139,8 +160,24 @@ class SignUp extends React.Component {
 					'content-type': 'application/json',
 				},
 			});
-			const parsedRes = await res.json();
-			console.log(parsedRes);
+
+			if (!res.ok) {
+				const error = await res.text();
+				this.setState(() => ({ error }));
+				return;
+			}
+
+			const error = '';
+			const fields = {
+				name: '',
+				email: '',
+				password: '',
+			};
+			this.setState(() => ({ error, fields }));
+
+			const token = res.headers.get('x-auth-token');
+			localStorage.setItem('token', token);
+			this.props.history.push('/dashboard');
 		} catch (ex) {
 			console.log(ex);
 		}
@@ -166,50 +203,54 @@ class SignUp extends React.Component {
 	render() {
 		const { name, email, password } = this.state.fields;
 		return (
-			<Wrapper>
-				<form onSubmit={this.onSubmitForm}>
-					<input
-						type="text"
-						placeholder="name"
-						name="name"
-						value={name}
-						onChange={this.onChangeInput}
-					/>
-					<div />
-					{this.state.errFields.name && (
-						<InvalidField>{this.state.errFields.name}</InvalidField>
-					)}
-					<input
-						type="text"
-						placeholder="email"
-						name="email"
-						value={email}
-						onChange={this.onChangeInput}
-					/>
-					<div />
-					{this.state.errFields.email && (
-						<InvalidField>{this.state.errFields.email}</InvalidField>
-					)}
-					<input
-						type="password"
-						placeholder="password"
-						name="password"
-						value={password}
-						onChange={this.onChangeInput}
-					/>
-					<div />
-					{this.state.errFields.password && (
-						<InvalidField>{this.state.errFields.password}</InvalidField>
-					)}
+			<React.Fragment>
+				<Error error={this.state.error}>{this.state.error}</Error>
+				<FormWrapper>
+					<form onSubmit={this.onSubmitForm}>
+						<input
+							type="text"
+							placeholder="name"
+							name="name"
+							value={name}
+							onChange={this.onChangeInput}
+						/>
+						<div />
+						{this.state.errFields.name && (
+							<InvalidField>{this.state.errFields.name}</InvalidField>
+						)}
+						<input
+							type="text"
+							placeholder="email"
+							name="email"
+							value={email}
+							onChange={this.onChangeInput}
+						/>
+						<div />
+						{this.state.errFields.email && (
+							<InvalidField>{this.state.errFields.email}</InvalidField>
+						)}
+						<input
+							type="password"
+							placeholder="password"
+							name="password"
+							value={password}
+							onChange={this.onChangeInput}
+						/>
+						<div />
+						{this.state.errFields.password && (
+							<InvalidField>{this.state.errFields.password}</InvalidField>
+						)}
 
-					<button>Sign up</button>
-				</form>
-				<div>
-					Have an account? - <RedirectLink to="/">Login!</RedirectLink>
-				</div>
-			</Wrapper>
+						<button>Sign up</button>
+					</form>
+
+					<div>
+						Have an account? - <RedirectLink to="/">Login!</RedirectLink>
+					</div>
+				</FormWrapper>
+			</React.Fragment>
 		);
 	}
 }
 
-export default SignUp;
+export default withRouter(SignUp);
