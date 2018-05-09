@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import DoneColumn from './DoneColumn';
 import TodosColumn from './TodosColumn';
 
-class App extends Component {
+class TodosDashboard extends Component {
 	state = {
 		todos: [],
 		todo: {
@@ -24,23 +24,57 @@ class App extends Component {
 				return;
 			}
 			const todos = await res.json();
-			console.log(todos);
+			this.setState(() => ({ todos }));
 		} catch (ex) {
 			console.log(ex);
 		}
 	}
 
-	onChangeInput = () => {};
+	onChangeInput = e => {
+		const val = e.target.value;
+		const todo = { ...this.state.todo };
+		todo.text = val;
+		this.setState(() => ({ todo }));
+	};
+
+	onSubmitForm = async e => {
+		e.preventDefault();
+
+		const res = await fetch('/api/todos', {
+			method: 'POST',
+			body: JSON.stringify(this.state.todo),
+			headers: {
+				'content-type': 'application/json',
+				'x-auth-token': localStorage.getItem('token'),
+			},
+		});
+
+		if (!res.ok) {
+			console.log(res.text());
+			return;
+		}
+		const todo = await res.json();
+		const todos = [...this.state.todos, todo];
+		this.setState(() => ({ todos }));
+	};
 
 	render() {
+		const { todos } = this.state;
 		return (
 			<div>
-				<input type="text" value={this.state.text} />
-				<TodosColumn />
-				<DoneColumn />
+				<form onSubmit={this.onSubmitForm}>
+					<input
+						type="text"
+						value={this.state.text}
+						onChange={this.onChangeInput}
+					/>
+					<button>Add todo</button>
+				</form>
+				<TodosColumn todos={todos} />
+				<DoneColumn todos={todos} />
 			</div>
 		);
 	}
 }
 
-export default App;
+export default TodosDashboard;
